@@ -1,5 +1,6 @@
 numpy~=1.21.4
 tensorflow~=2.7.0
+tqdm~=4.62.3
 # Please install those from https://pytorch.org/
 #torch~=1.10.0+cu113 or the corresponding cpu / cuda 10 version
 #torchvision~=0.11.1+cu113 or the corresponding cpu / cuda 10 version
