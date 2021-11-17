@@ -39,7 +39,7 @@ class LeNet5(Module):
             Linear(in_features=120, out_features=84),
             head_activation,
             Linear(in_features=84, out_features=n_classes),
-            Softmax()
+            Softmax(1)
         )
 
     def forward(self, X):
