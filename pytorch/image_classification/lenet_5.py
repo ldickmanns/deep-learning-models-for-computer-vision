@@ -8,7 +8,7 @@ class LeNet5(Module):
         self,
         in_channels: int,
         n_classes: int,
-        activation: Optional[Module],
+        activation: Optional[Module] = None,
         head_activation: Optional[Module] = None,
         pooling: Optional[Module] = None,
     ):
