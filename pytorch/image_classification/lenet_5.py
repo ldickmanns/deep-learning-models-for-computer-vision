@@ -24,7 +24,7 @@ class LeNet5(Module):
             pooling = AvgPool2d(2)
 
         self.feature_extractor = Sequential(
-            Conv2d(in_channels=in_channels, out_channels=6, kernel_size=5),
+            Conv2d(in_channels=in_channels, out_channels=6, kernel_size=5, padding='same'),
             activation,
             pooling,
             Conv2d(in_channels=6, out_channels=16, kernel_size=5),
@@ -39,7 +39,7 @@ class LeNet5(Module):
             Linear(in_features=120, out_features=84),
             head_activation,
             Linear(in_features=84, out_features=n_classes),
-            Softmax(dim=n_classes)
+            Softmax()
         )
 
     def forward(self, X):
