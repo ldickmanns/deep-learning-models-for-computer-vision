@@ -97,11 +97,8 @@ def train(
     device = device if device is not None else get_device()
     model.to(device)
 
-    if optimizer is None:
-        optimizer = Adam(model.parameters())
-
-    if criterion is None:
-        criterion = CrossEntropyLoss()
+    optimizer = optimizer if optimizer is not None else Adam(model.parameters())
+    criterion = criterion if criterion is not None else CrossEntropyLoss()
 
     validate = valid_dataset is not None
 
