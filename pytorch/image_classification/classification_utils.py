@@ -92,8 +92,9 @@ def train(
     batch_size: int = 32,
     shuffle: bool = True,
     verbose: int = 2,
+    device: str = None
 ):
-    device = get_device()
+    device = device if device is not None else get_device()
     model.to(device)
 
     if optimizer is None:
