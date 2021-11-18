@@ -33,7 +33,7 @@ def train_epoch(
     epoch_loss = 0.0
     n_correct = 0
 
-    _iterator = tqdm(train_loader, ncols=100) if verbose else train_loader
+    _iterator = tqdm(train_loader, ncols=69) if verbose else train_loader
     for X, y in _iterator:
         optimizer.zero_grad()
         X = X.to(device)
@@ -91,7 +91,7 @@ def train(
     valid_dataset: Optional[VisionDataset] = None,
     batch_size: int = 32,
     shuffle: bool = True,
-    verbose: bool = True,
+    verbose: int = 2,
 ):
     device = get_device()
     model.to(device)
@@ -114,6 +114,8 @@ def train(
         history['val_loss'] = []
         history['val_accuracy'] = []
 
+    _epoch_range = range(epochs)
+    _iterator = tqdm(_epoch_range, ncols=69) if verbose == 1 else _epoch_range
     for epoch in range(epochs):
         train_loss, train_acc = train_epoch(
             model=model,
@@ -121,7 +123,7 @@ def train(
             optimizer=optimizer,
             criterion=criterion,
             device=device,
-            verbose=verbose,
+            verbose=verbose == 2,
         )
         history['loss'].append(train_loss)
         history['accuracy'].append(train_acc)
@@ -136,7 +138,7 @@ def train(
             history['val_loss'].append(valid_loss)
             history['val_accuracy'].append(valid_acc)
 
-        if verbose:
+        if verbose == 2:
             print(
                 f'Epoch: {epoch + 1} - ' +
                 f'loss: {train_loss} - ' +
