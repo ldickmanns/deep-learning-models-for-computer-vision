@@ -10,7 +10,7 @@ from torchvision import transforms
 from torchvision.datasets import MNIST, VisionDataset
 from tqdm import tqdm
 
-from pytorch.utils import get_device
+from ..utils import get_device
 
 Data = Union[DataLoader, Dataset]
 
