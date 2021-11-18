@@ -54,3 +54,59 @@ def valid_epoch(
 
     epoch_loss /= len(valid_loader.dataset)
     return epoch_loss
+
+
+def train(
+    model: Module,
+    train_dataset: VisionDataset,
+    epochs: int,
+    optimizer: Optimizer = None,
+    criterion: Loss = None,
+    valid_dataset: Optional[VisionDataset] = None,
+    batch_size: int = 32,
+    shuffle: bool = True,
+    verbose: bool = True,
+):
+    device = get_device()
+    model.to(device)
+
+    if optimizer is None:
+        optimizer = Adam(model.parameters())
+
+    if criterion is None:
+        criterion = CrossEntropyLoss()
+
+    validate = valid_dataset is not None
+
+    train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=shuffle)
+    if validate:
+        valid_loader = DataLoader(dataset=valid_dataset, batch_size=batch_size, shuffle=shuffle)
+
+    train_losses = []
+    valid_losses = []
+
+    for epoch in range(epochs):
+        train_loss = train_epoch(
+            model=model,
+            train_loader=train_loader,
+            criterion=criterion,
+            optimizer=optimizer,
+            device=device
+        )
+        train_losses.append(train_loss)
+
+        if validate:
+            valid_loss = valid_epoch(
+                model=model,
+                valid_loader=valid_loader,
+                criterion=criterion,
+                device=device
+            )
+            valid_losses.append(valid_loss)
+
+        if verbose:
+            print(
+                f'Epoch: {epoch + 1} - ' +
+                f'loss: {train_loss} - ' +
+                (f'val_loss: {valid_loss} - ' if validate else '')
+            )
