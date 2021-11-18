@@ -1,6 +1,7 @@
 from typing import Optional, Union
 
 import torch
+from torch import Tensor
 from torch.nn import Module, CrossEntropyLoss
 from torch.nn.modules.loss import _Loss as Loss
 from torch.optim import Adam, Optimizer
@@ -14,19 +15,10 @@ from pytorch.utils import get_device
 Data = Union[DataLoader, Dataset]
 
 
-def get_accuracy(model, data: Data, device: str) -> float:
-    data_loader = data if isinstance(data, DataLoader) else DataLoader(data)
-    n_correct = 0
-
-    for X, y in data_loader:
-        X = X.to(device)
-        y = y.to(device)
-
-        outputs = model(X)
-        _, y_pred = torch.max(outputs, 1)
-        n_correct += (y_pred == y).sum().item()
-
-    return n_correct / len(data_loader.dataset)
+def _n_correct(outputs: Tensor, y: Tensor) -> int:
+    _, y_pred = torch.max(outputs, 1)
+    n_correct = (y_pred == y).sum().item()
+    return n_correct
 
 
 def train_epoch(
@@ -35,9 +27,10 @@ def train_epoch(
     criterion: Loss,
     optimizer: Optimizer,
     device: str
-) -> float:
+) -> tuple[float, float]:
     model.train().to(device)
     epoch_loss = 0.0
+    n_correct = 0
 
     for X, y in tqdm(train_loader):
         optimizer.zero_grad()
@@ -48,13 +41,16 @@ def train_epoch(
         outputs = model(X)
         loss = criterion(outputs, y)
         epoch_loss += loss.item() * X.size(0)
+        n_correct += _n_correct(outputs, y)
 
         # Backward pass
         loss.backward()
         optimizer.step()
 
-    epoch_loss /= len(train_loader.dataset)
-    return epoch_loss
+    dataset_size = len(train_loader.dataset)
+    epoch_loss /= dataset_size
+    epoch_acc = n_correct / dataset_size
+    return epoch_loss, epoch_acc
 
 
 def valid_epoch(
@@ -62,9 +58,10 @@ def valid_epoch(
     valid_loader: DataLoader,
     criterion: Loss,
     device: str
-) -> float:
+) -> tuple[float, float]:
     model.eval().to(device)
     epoch_loss = 0.0
+    n_correct = 0
 
     for X, y in valid_loader:
         X = X.to(device)
@@ -75,9 +72,12 @@ def valid_epoch(
             outputs = model(X)
             loss = criterion(outputs, y)
             epoch_loss += loss.item() * X.size(0)
+            n_correct += _n_correct(outputs, y)
 
-    epoch_loss /= len(valid_loader.dataset)
-    return epoch_loss
+    dataset_size = len(valid_loader.dataset)
+    epoch_loss /= dataset_size
+    epoch_acc = n_correct / dataset_size
+    return epoch_loss, epoch_acc
 
 
 def train(
@@ -110,7 +110,7 @@ def train(
     valid_losses = []
 
     for epoch in range(epochs):
-        train_loss = train_epoch(
+        train_loss, train_acc = train_epoch(
             model=model,
             train_loader=train_loader,
             criterion=criterion,
@@ -120,7 +120,7 @@ def train(
         train_losses.append(train_loss)
 
         if validate:
-            valid_loss = valid_epoch(
+            valid_loss, valid_acc = valid_epoch(
                 model=model,
                 valid_loader=valid_loader,
                 criterion=criterion,
@@ -129,8 +129,6 @@ def train(
             valid_losses.append(valid_loss)
 
         if verbose:
-            train_acc = get_accuracy(model, train_loader, device)
-            valid_acc = get_accuracy(model, valid_loader, device) if validate else 0.0
             print(
                 f'Epoch: {epoch + 1} - ' +
                 f'loss: {train_loss} - ' +
