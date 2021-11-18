@@ -1,8 +1,31 @@
-from torch.nn import Module
+from typing import Optional, Union
+
+import torch
+from torch.nn import Module, CrossEntropyLoss
 from torch.nn.modules.loss import _Loss as Loss
-from torch.optim import Optimizer
-from torch.utils.data import DataLoader
+from torch.optim import Adam, Optimizer
+from torch.utils.data import DataLoader, Dataset
+from torchvision.datasets import VisionDataset
 from tqdm import tqdm
+
+from pytorch.utils import get_device
+
+Data = Union[DataLoader, Dataset]
+
+
+def get_accuracy(model, data: Data, device: str) -> float:
+    data_loader = data if isinstance(data, DataLoader) else DataLoader(data)
+    n_correct = 0
+
+    for X, y in data_loader:
+        X = X.to(device)
+        y = y.to(device)
+
+        outputs = model(X)
+        _, y_pred = torch.max(outputs, 1)
+        n_correct += (y_pred == y).sum().item()
+
+    return n_correct / len(data_loader.dataset)
 
 
 def train_epoch(
@@ -105,8 +128,12 @@ def train(
             valid_losses.append(valid_loss)
 
         if verbose:
+            train_acc = get_accuracy(model, train_loader, device)
+            valid_acc = get_accuracy(model, valid_loader, device) if validate else 0.0
             print(
                 f'Epoch: {epoch + 1} - ' +
                 f'loss: {train_loss} - ' +
-                (f'val_loss: {valid_loss} - ' if validate else '')
+                f'accuracy: {train_acc} - ' +
+                (f'val_loss: {valid_loss} - ' +
+                 f'val_accuracy: {valid_acc}' if validate else '')
             )
