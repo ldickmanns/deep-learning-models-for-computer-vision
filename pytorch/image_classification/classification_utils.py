@@ -5,7 +5,8 @@ from torch.nn import Module, CrossEntropyLoss
 from torch.nn.modules.loss import _Loss as Loss
 from torch.optim import Adam, Optimizer
 from torch.utils.data import DataLoader, Dataset
-from torchvision.datasets import VisionDataset
+from torchvision import transforms
+from torchvision.datasets import MNIST, VisionDataset
 from tqdm import tqdm
 
 from pytorch.utils import get_device
@@ -137,3 +138,16 @@ def train(
                 (f'val_loss: {valid_loss} - ' +
                  f'val_accuracy: {valid_acc}' if validate else '')
             )
+
+
+def load_normalized_mnist() -> tuple[MNIST, MNIST, MNIST]:
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.1307,), (0.3081,))
+    ])
+
+    train_dataset = MNIST(root='../data/mnist', train=True, transform=transform, download=True)
+    train_dataset, valid_dataset = torch.utils.data.random_split(train_dataset, [50000, 10000])
+    test_dataset = MNIST(root='../data/mnist', train=False, transform=transform, download=True)
+
+    return train_dataset, valid_dataset, test_dataset
