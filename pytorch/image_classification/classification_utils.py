@@ -108,8 +108,11 @@ def train(
     if validate:
         valid_loader = DataLoader(dataset=valid_dataset, batch_size=batch_size, shuffle=shuffle)
 
-    train_losses = []
-    valid_losses = []
+    history: dict[str, list[float]] = {'loss': [], 'accuracy': [],}
+
+    if validate:
+        history['val_loss'] = []
+        history['val_accuracy'] = []
 
     for epoch in range(epochs):
         train_loss, train_acc = train_epoch(
@@ -120,16 +123,18 @@ def train(
             device=device,
             verbose=verbose,
         )
-        train_losses.append(train_loss)
+        history['loss'].append(train_loss)
+        history['accuracy'].append(train_acc)
 
         if validate:
             valid_loss, valid_acc = valid_epoch(
                 model=model,
                 valid_loader=valid_loader,
                 criterion=criterion,
-                device=device
+                device=device,
             )
-            valid_losses.append(valid_loss)
+            history['val_loss'].append(valid_loss)
+            history['val_accuracy'].append(valid_acc)
 
         if verbose:
             print(
@@ -139,6 +144,8 @@ def train(
                 (f'val_loss: {valid_loss} - ' +
                  f'val_accuracy: {valid_acc}' if validate else '')
             )
+
+    return history
 
 
 def load_normalized_mnist() -> tuple[MNIST, MNIST, MNIST]:
