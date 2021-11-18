@@ -116,7 +116,7 @@ def train(
 
     _epoch_range = range(epochs)
     _iterator = tqdm(_epoch_range, ncols=69) if verbose == 1 else _epoch_range
-    for epoch in range(epochs):
+    for epoch in _iterator:
         train_loss, train_acc = train_epoch(
             model=model,
             train_loader=train_loader,
