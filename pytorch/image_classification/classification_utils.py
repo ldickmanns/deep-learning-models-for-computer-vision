@@ -24,15 +24,17 @@ def _n_correct(outputs: Tensor, y: Tensor) -> int:
 def train_epoch(
     model: Module,
     train_loader: DataLoader,
-    criterion: Loss,
     optimizer: Optimizer,
-    device: str
+    criterion: Loss,
+    device: str,
+    verbose: bool = True,
 ) -> tuple[float, float]:
     model.train().to(device)
     epoch_loss = 0.0
     n_correct = 0
 
-    for X, y in tqdm(train_loader):
+    _iterator = tqdm(train_loader, ncols=100) if verbose else train_loader
+    for X, y in _iterator:
         optimizer.zero_grad()
         X = X.to(device)
         y = y.to(device)
@@ -113,9 +115,10 @@ def train(
         train_loss, train_acc = train_epoch(
             model=model,
             train_loader=train_loader,
-            criterion=criterion,
             optimizer=optimizer,
-            device=device
+            criterion=criterion,
+            device=device,
+            verbose=verbose,
         )
         train_losses.append(train_loss)
 
