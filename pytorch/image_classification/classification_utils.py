@@ -141,10 +141,10 @@ def train(
         if verbose == 2:
             print(
                 f'Epoch: {epoch + 1} - ' +
-                f'loss: {train_loss} - ' +
-                f'accuracy: {train_acc} - ' +
-                (f'val_loss: {valid_loss} - ' +
-                 f'val_accuracy: {valid_acc}' if validate else '')
+                f'loss: {train_loss:.5f} - ' +
+                f'accuracy: {train_acc:.5f} - ' +
+                (f'val_loss: {valid_loss:.5f} - ' +
+                 f'val_accuracy: {valid_acc:.5f}' if validate else '')
             )
 
     return history
