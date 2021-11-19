@@ -156,9 +156,8 @@ def load_normalized_mnist() -> tuple[MNIST, MNIST, MNIST]:
         transforms.Normalize((0.1307,), (0.3081,))
     ])
 
-    mnist_path = join(DATA_PATH, 'mnist')
-    train_dataset = MNIST(root=mnist_path, train=True, transform=transform, download=True)
+    train_dataset = MNIST(root=DATA_PATH, train=True, transform=transform, download=True)
     train_dataset, valid_dataset = torch.utils.data.random_split(train_dataset, [50000, 10000])
-    test_dataset = MNIST(root=mnist_path, train=False, transform=transform, download=True)
+    test_dataset = MNIST(root=DATA_PATH, train=False, transform=transform, download=True)
 
     return train_dataset, valid_dataset, test_dataset
