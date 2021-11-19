@@ -1,6 +1,6 @@
 from typing import Optional
 
-from torch.nn import AvgPool2d, Conv2d, Flatten, Linear, Module, Sequential, Sigmoid, Softmax
+from torch.nn import AvgPool2d, Conv2d, Flatten, Linear, Module, Sequential, Softmax, Tanh
 
 
 class LeNet5(Module):
@@ -15,7 +15,7 @@ class LeNet5(Module):
         super(LeNet5, self).__init__()
 
         if activation is None:
-            activation = Sigmoid()
+            activation = Tanh()
 
         if head_activation is None:
             head_activation = activation
