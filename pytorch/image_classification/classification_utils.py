@@ -1,4 +1,3 @@
-from os.path import join
 from typing import Optional, Union
 
 import torch
@@ -7,14 +6,12 @@ from torch.nn import Module, CrossEntropyLoss
 from torch.nn.modules.loss import _Loss as Loss
 from torch.optim import Adam, Optimizer
 from torch.utils.data import DataLoader, Dataset
-from torchvision import transforms
-from torchvision.datasets import MNIST, VisionDataset
+from torchvision.datasets import VisionDataset
 from tqdm import tqdm
 
 from ..utils import get_device
 
 Data = Union[DataLoader, Dataset]
-DATA_PATH = join('..', 'data')
 
 
 def _n_correct(outputs: Tensor, y: Tensor) -> int:
@@ -108,7 +105,7 @@ def train(
     if validate:
         valid_loader = DataLoader(dataset=valid_dataset, batch_size=batch_size, shuffle=shuffle)
 
-    history: dict[str, list[float]] = {'loss': [], 'accuracy': [],}
+    history: dict[str, list[float]] = {'loss': [], 'accuracy': []}
 
     if validate:
         history['val_loss'] = []
@@ -148,16 +145,3 @@ def train(
             )
 
     return history
-
-
-def load_normalized_mnist() -> tuple[MNIST, MNIST, MNIST]:
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,))
-    ])
-
-    train_dataset = MNIST(root=DATA_PATH, train=True, transform=transform, download=True)
-    train_dataset, valid_dataset = torch.utils.data.random_split(train_dataset, [50000, 10000])
-    test_dataset = MNIST(root=DATA_PATH, train=False, transform=transform, download=True)
-
-    return train_dataset, valid_dataset, test_dataset
