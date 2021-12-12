@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from ..utils import get_device
 
-Data = Union[DataLoader, Dataset]
+Data = Union[DataLoader, VisionDataset]
 
 
 def _n_correct(outputs: Tensor, y: Tensor) -> int:
@@ -83,11 +83,11 @@ def valid_epoch(
 
 def train(
     model: Module,
-    train_dataset: VisionDataset,
+    train_data: Data,
     epochs: int,
     optimizer: Optimizer = None,
     criterion: Loss = None,
-    valid_dataset: Optional[VisionDataset] = None,
+    valid_data: Optional[Data] = None,
     batch_size: int = 32,
     shuffle: bool = True,
     verbose: int = 2,
@@ -99,11 +99,15 @@ def train(
     optimizer = optimizer if optimizer is not None else Adam(model.parameters())
     criterion = criterion if criterion is not None else CrossEntropyLoss()
 
-    validate = valid_dataset is not None
+    validate = valid_data is not None
 
-    train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=shuffle)
+    train_loader = train_data if isinstance(train_data, DataLoader) else DataLoader(
+        dataset=train_data, batch_size=batch_size, shuffle=shuffle
+    )
     if validate:
-        valid_loader = DataLoader(dataset=valid_dataset, batch_size=batch_size, shuffle=shuffle)
+        valid_loader = valid_data if isinstance(valid_data, DataLoader) else DataLoader(
+            dataset=valid_data, batch_size=batch_size, shuffle=shuffle
+        )
 
     history: dict[str, list[float]] = {'loss': [], 'accuracy': []}
 
